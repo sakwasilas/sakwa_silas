@@ -43,7 +43,7 @@ def role_required(required_role):
 # -----------------------
 @app.route('/')
 def home():
-    return render_template('admin/landing.html')
+    return render_template('admin/landing_page.html')
 
 # -----------------------
 # Login
