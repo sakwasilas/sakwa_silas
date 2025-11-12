@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACE Education - Admin Dashboard</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Poppins', sans-serif;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #0d6efd;
+      color: white;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      padding: 20px;
+    }
+    .sidebar h2 {
+      font-size: 1.4rem;
+      margin-bottom: 30px;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 10px 0;
+      border-radius: 5px;
+    }
+    .sidebar a:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
+    .content {
+      margin-left: 270px;
+      padding: 20px;
+    }
+    .footer {
+      background: #0d6efd;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .table th, .table td {
+      vertical-align: middle;
+    }
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; position: relative; }
+      .content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>ACE Education</h2>
+    <a href="#">Dashboard</a>
+    <a href="{{ url_for('manage_teachers') }}">Manage Teachers</a> <!-- ✅ Added -->
+    <a href="{{ url_for('manage_students') }}">Manage Students</a>
+    <a href="#live">Live Classes</a>
+    <a href="#materials">Materials</a>
+    <a href="#videos">Videos</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h3 class="mb-4">Admin Dashboard</h3>
+
+    <!-- ✅ NEW ADMIN OVERVIEW SECTION -->
+    <div class="container mb-4">
+      <h4 class="mb-3">📊 Admin Overview</h4>
+
+      {% if pending_teachers > 0 or pending_students > 0 %}
+      <div class="alert alert-warning" role="alert">
+        ⚠️ There are pending approvals:
+        {% if pending_teachers > 0 %}
+          <strong>{{ pending_teachers }}</strong> teacher(s)
+          <a href="{{ url_for('manage_teachers') }}" class="alert-link">review</a>
+        {% endif %}
+        {% if pending_students > 0 %}
+          <strong>{{ pending_students }}</strong> student(s)
+          <a href="{{ url_for('manage_students') }}" class="alert-link">review</a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-center border-success">
+            <div class="card-body">
+              <h5 class="card-title">👩‍🏫 Teachers</h5>
+              <p class="card-text fs-4">{{ total_teachers }}</p>
+              <a href="{{ url_for('manage_teachers') }}" class="btn btn-outline-success btn-sm">Manage Teachers</a>
+              {% if pending_teachers > 0 %}
+                <span class="badge bg-warning text-dark mt-2">{{ pending_teachers }} pending</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center border-primary">
+            <div class="card-body">
+              <h5 class="card-title">👨‍🎓 Students</h5>
+              <p class="card-text fs-4">{{ total_students }}</p>
+              <a href="{{ url_for('manage_students') }}" class="btn btn-outline-primary btn-sm">Manage Students</a>
+              {% if pending_students > 0 %}
+                <span class="badge bg-warning text-dark mt-2">{{ pending_students }} pending</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ✅ END ADMIN OVERVIEW SECTION --
+
+    <!-- ================= LIVE CLASSES ================= -->
+    <div id="live" class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Live Classes</h5>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#liveClassModal">+ Add Live Class</button>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped">
+          <thead class="table-primary">
+            <tr>
+              <th>Title</th>
+              <th>Link</th>
+              <th>Time</th>
+              <th>Form</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cls in live_classes %}
+            <tr>
+              <td>{{ cls.title }}</td>
+              <td><a href="{{ cls.link }}" target="_blank" class="btn btn-sm btn-outline-primary">Join</a></td>
+              <td>{{ cls.time }}</td>
+              <td>{{ cls.form }}</td>
+              <td>{{ cls.subject }}</td>
+              <td>
+                {% if cls.active %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <button class="btn btn-sm btn-warning edit-liveclass-btn"
+                        data-id="{{ cls.id }}"
+                        data-title="{{ cls.title }}"
+                        data-link="{{ cls.link }}"
+                        data-time="{{ cls.time }}"
+                        data-form="{{ cls.form }}"
+                        data-subject="{{ cls.subject }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editLiveClassModal">Edit</button>
+                <form method="POST" action="{{ url_for('delete_live_class', class_id=cls.id) }}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Delete this class?');">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================= MATERIALS ================= -->
+    <div id="materials" class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Materials (PDFs)</h5>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#materialModal">+ Add Material</button>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped">
+          <thead class="table-primary">
+            <tr>
+              <th>Title</th>
+              <th>Subject</th>
+              <th>Form</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in revision_materials %}
+            <tr>
+              <td>{{ m.title }}</td>
+              <td>{{ m.subject }}</td>
+              <td>{{ m.form }}</td>
+              <td>
+                <button class="btn btn-sm btn-warning edit-material-btn"
+                        data-id="{{ m.id }}"
+                        data-title="{{ m.title }}"
+                        data-link="{{ m.link }}"
+                        data-form="{{ m.form }}"
+                        data-subject="{{ m.subject }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editMaterialModal">Edit</button>
+                <form method="POST" action="{{ url_for('delete_material', material_id=m.id) }}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Delete this material?');">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================= VIDEOS ================= -->
+    <div id="videos" class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Videos</h5>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#videoModal">+ Add Video</button>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped">
+          <thead class="table-primary">
+            <tr>
+              <th>Title</th>
+              <th>Link</th>
+              <th>Subject</th>
+              <th>Form</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in videos %}
+            <tr>
+              <td>{{ v.title }}</td>
+              <td><a href="{{ v.link }}" target="_blank" class="btn btn-sm btn-outline-primary">Watch</a></td>
+              <td>{{ v.subject }}</td>
+              <td>{{ v.form }}</td>
+              <td>
+                <button class="btn btn-sm btn-warning edit-video-btn"
+                        data-id="{{ v.id }}"
+                        data-title="{{ v.title }}"
+                        data-link="{{ v.link }}"
+                        data-subject="{{ v.subject }}"
+                        data-form="{{ v.form }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editVideoModal">Edit</button>
+                <form method="POST" action="{{ url_for('delete_video', video_id=v.id) }}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Delete this video?');">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer mt-4">&copy; {{ current_year }} ACE Education</div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Add Live Class Modal -->
+  <div class="modal fade" id="liveClassModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" method="POST" action="{{ url_for('add_live_class') }}">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Live Class</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input class="form-control mb-2" name="title" placeholder="Title" required>
+          <input class="form-control mb-2" name="link" placeholder="Class Link" required>
+          <input class="form-control mb-2" name="time" placeholder="Time" required>
+          <select class="form-select mb-2" name="form" required>
+            <option value="">Select Form</option>
+            <option>Form 1</option><option>Form 2</option>
+            <option>Form 3</option><option>Form 4</option>
+          </select>
+          <input class="form-control mb-2" name="subject" placeholder="Subject" required>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" type="submit">Add Class</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Live Class Modal -->
+  <div class="modal fade" id="editLiveClassModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="edit-live-class-form" class="modal-content" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Live Class</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-id" name="id">
+          <input class="form-control mb-2" id="edit-title" name="title" placeholder="Title" required>
+          <input class="form-control mb-2" id="edit-link" name="link" placeholder="Class Link" required>
+          <input class="form-control mb-2" id="edit-time" name="time" placeholder="Time" required>
+          <select class="form-select mb-2" id="edit-form" name="form" required>
+            <option>Form 1</option><option>Form 2</option>
+            <option>Form 3</option><option>Form 4</option>
+          </select>
+          <input class="form-control mb-2" id="edit-subject" name="subject" placeholder="Subject" required>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" type="submit">Update Class</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Material Modal -->
+  <div class="modal fade" id="materialModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" method="POST" action="{{ url_for('add_material') }}" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Material</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input class="form-control mb-2" name="title" placeholder="Title" required>
+          <input class="form-control mb-2" name="link" placeholder="Drive Link (optional)">
+          <select class="form-select mb-2" name="form" required>
+            <option value="">Select Form</option>
+            <option>Form 1</option><option>Form 2</option>
+            <option>Form 3</option><option>Form 4</option>
+          </select>
+          <input class="form-control mb-2" name="subject" placeholder="Subject" required>
+          <label>Upload PDF (optional)</label>
+          <input type="file" class="form-control" name="file" accept=".pdf">
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" type="submit">Add Material</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Material Modal -->
+  <div class="modal fade" id="editMaterialModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="edit-material-form" class="modal-content" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Material</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" id="edit-material-id">
+          <input class="form-control mb-2" name="title" id="edit-material-title" placeholder="Title" required>
+          <input class="form-control mb-2" name="link" id="edit-material-link" placeholder="Drive Link (optional)">
+          <select class="form-select mb-2" name="form" id="edit-material-form-select" required>
+            <option>Form 1</option><option>Form 2</option>
+            <option>Form 3</option><option>Form 4</option>
+          </select>
+          <input class="form-control mb-2" name="subject" id="edit-material-subject" placeholder="Subject" required>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" type="submit">Update Material</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Video Modal -->
+  <div class="modal fade" id="videoModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" method="POST" action="{{ url_for('add_video') }}">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Video</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input class="form-control mb-2" name="title" placeholder="Video Title" required>
+          <input class="form-control mb-2" name="link" placeholder="YouTube Link" required>
+          <input class="form-control mb-2" name="subject" placeholder="Subject" required>
+          <select class="form-select mb-2" name="form" required>
+            <option value="">Select Form</option>
+            <option>Form 1</option><option>Form 2</option>
+            <option>Form 3</option><option>Form 4</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" type="submit">Add Video</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Video Modal -->
+  <div class="modal fade" id="editVideoModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="edit-video-form" class="modal-content" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Video</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" id="edit-video-id">
+          <input class="form-control mb-2" name="title" id="edit-video-title" placeholder="Title" required>
+          <input class="form-control mb-2" name="link" id="edit-video-link" placeholder="Link" required>
+          <input class="form-control mb-2" name="subject" id="edit-video-subject" placeholder="Subject" required>
+          <select class="form-select mb-2" name="form" id="edit-video-form-select" required>
+            <option>Form 1</option><option>Form 2</option>
+            <option>Form 3</option><option>Form 4</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" type="submit">Update Video</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS for Edit Modals -->
+  <script>
+    // Live class edit
+    document.querySelectorAll('.edit-liveclass-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-title').value = btn.dataset.title;
+        document.getElementById('edit-link').value = btn.dataset.link;
+        document.getElementById('edit-time').value = btn.dataset.time;
+        document.getElementById('edit-form').value = btn.dataset.form;
+        document.getElementById('edit-subject').value = btn.dataset.subject;
+        document.getElementById('edit-live-class-form').action = `/admin/live_class/edit/${id}`;
+      });
+    });
+
+    // Material edit
+    document.querySelectorAll('.edit-material-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        document.getElementById('edit-material-id').value = id;
+        document.getElementById('edit-material-title').value = btn.dataset.title;
+        document.getElementById('edit-material-link').value = btn.dataset.link;
+        document.getElementById('edit-material-form-select').value = btn.dataset.form;
+        document.getElementById('edit-material-subject').value = btn.dataset.subject;
+        document.getElementById('edit-material-form').action = `/admin/material/edit/${id}`;
+      });
+    });
+
+    // Video edit
+    document.querySelectorAll('.edit-video-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        document.getElementById('edit-video-id').value = id;
+        document.getElementById('edit-video-title').value = btn.dataset.title;
+        document.getElementById('edit-video-link').value = btn.dataset.link;
+        document.getElementById('edit-video-subject').value = btn.dataset.subject;
+        document.getElementById('edit-video-form-select').value = btn.dataset.form;
+        document.getElementById('edit-video-form').action = `/admin/video/edit/${id}`;
+      });
+    });
+  </script>
+
+</body>
+</html>

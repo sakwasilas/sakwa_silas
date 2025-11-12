@@ -1,0 +1,134 @@
+
+<style>
+  /* Container to center the table */
+  .table-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+  }
+
+  h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+  }
+
+  /* Table styling */
+  table.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  table.table th,
+  table.table td {
+    padding: 12px 15px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+  }
+
+  table.table th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 600;
+    cursor: default;
+  }
+
+  table.table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  /* Badge styling */
+  .badge {
+    font-size: 0.9rem;
+    padding: 5px 12px;
+    border-radius: 12px;
+  }
+
+  .badge.bg-success {
+    background-color: #2ecc71 !important;
+    color: white;
+  }
+
+  .badge.bg-warning {
+    background-color: #f1c40f !important;
+    color: #2c3e50;
+  }
+
+  /* Button styling */
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 0.85rem;
+    border-radius: 12px;
+    transition: 0.3s;
+  }
+
+  .btn-success {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background-color: #1e8449;
+    color: white;
+  }
+
+  .btn-danger {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+  }
+
+  .btn-danger:hover {
+    background-color: #c0392b;
+    color: white;
+  }
+</style>
+
+<div class="table-container">
+  <h2>Manage Teachers</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Teacher Name</th>
+        <th>Phone</th>
+        <th>Subject</th>
+        <th>Approval Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in teachers %}
+      <tr>
+        <td>{{ t.id }}</td>
+        <td>{{ t.teacher_name }}</td>
+        <td>{{ t.phone_number }}</td>
+        <td>{{ t.subject }}</td>
+        <td>
+          {% if t.is_approved %}
+            <span class="badge bg-success">Approved</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if not t.is_approved %}
+            <a href="{{ url_for('approve_teacher', teacher_id=t.id) }}" class="btn btn-sm btn-success">Approve</a>
+          {% else %}
+            <a href="{{ url_for('block_teacher', teacher_id=t.id) }}" class="btn btn-sm btn-danger">Block</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+

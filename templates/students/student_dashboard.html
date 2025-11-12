@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      overflow-x: hidden;
+      transition: margin-left 0.3s ease-in-out;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background-color: #1f2937;
+      color: #f3f4f6;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      transform: translateX(0);
+      transition: transform 0.3s ease-in-out;
+      z-index: 1040;
+    }
+
+    .sidebar h5 {
+      color: #3b82f6;
+      font-weight: bold;
+      margin-top: 0.5rem;
+    }
+
+    .sidebar a {
+      color: #60a5fa;
+      text-decoration: none;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar a:hover {
+      color: #3b82f6;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 991px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      body.sidebar-open {
+        margin-left: 250px;
+      }
+    }
+
+    main {
+      margin-left: 250px;
+      transition: margin-left 0.3s ease-in-out;
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 991px) {
+      main {
+        margin-left: 0;
+      }
+
+      body.sidebar-open main {
+        margin-left: 250px;
+      }
+    }
+
+    .sidebar-toggle {
+      background-color: #1f2937;
+      color: #fff;
+      border: none;
+      font-size: 1.25rem;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+    }
+
+    .top-bar {
+      background-color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat {
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 100px;
+      flex: 1 1 100px;
+      transition: transform 0.2s;
+    }
+
+    .stat:hover {
+      transform: translateY(-2px);
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #1e3a8a;
+      border-bottom: 2px solid #3b82f6;
+      padding-bottom: 0.25rem;
+    }
+
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    iframe, video {
+      border-radius: 10px;
+      width: 100%;
+      height: 100%;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      pointer-events: auto;
+    }
+
+    /* Prevent built-in download buttons */
+    iframe::-internal-media-controls-download-button,
+    video::-internal-media-controls-download-button {
+      display: none;
+    }
+
+    footer {
+      background-color: #1f2937;
+      color: #f3f4f6;
+      text-align: center;
+      padding: 1rem 0;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    /* Fullscreen PDF Modal */
+    .modal-fullscreen .modal-content {
+      height: 100vh;
+      background-color: #000;
+    }
+    .modal-header {
+      background-color: #111;
+      color: white;
+      border-bottom: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+  <h1><center>ACE EDUCATION</center></h1>
+
+  <!-- Sidebar -->
+  <nav id="sidebar" class="sidebar">
+    <div class="text-center mb-4">
+      <i class="bi bi-person-circle fs-1 text-primary"></i>
+      <h5>{{ student.full_name }}</h5>
+    </div>
+    <p><strong>Form:</strong> {{ student.form }}</p>
+    <p><strong>Phone:</strong> {{ student.phone }}</p>
+    <p><strong>Guardian:</strong> {{ student.guardian_name }}</p>
+    <hr style="border-color: rgba(255,255,255,0.2);">
+    <a href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  </nav>
+
+  <!-- Main -->
+  <main>
+    <div class="d-lg-none text-start">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+      </button>
+    </div>
+
+    <div class="top-bar">
+      <div class="stat">
+        <h5>{{ live_classes|length }}</h5>
+        <small>Live Classes</small>
+      </div>
+      <div class="stat" style="background: linear-gradient(135deg, #10b981, #34d399);">
+        <h5>{{ revision_materials|length }}</h5>
+        <small>Materials</small>
+      </div>
+      <div class="stat" style="background: linear-gradient(135deg, #f97316, #fb923c);">
+        <h5>{{ videos|length }}</h5>
+        <small>Videos</small>
+      </div>
+    </div>
+
+    {% if not student.is_active %}
+      <div class="alert alert-warning text-center fw-semibold mt-3">
+        <i class="bi bi-exclamation-triangle-fill"></i> Account Inactive. Contact admin.
+      </div>
+    {% else %}
+      <div class="alert alert-success text-center fw-semibold mt-3">
+        <i class="bi bi-check-circle-fill"></i> Account Active.
+      </div>
+    {% endif %}
+
+    <h2 class="text-center mb-4">Student Dashboard</h2>
+
+    <!-- Live Classes -->
+    <div class="section-title">📡 Live Classes</div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      {% for cls in live_classes %}
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ cls.title }}</h5>
+            <p><strong>Subject:</strong> {{ cls.subject or "N/A" }}</p>
+            <p><strong>Time:</strong> {{ cls.time or "TBA" }}</p>
+            <a href="{{ cls.link }}" target="_blank" class="btn btn-primary btn-sm">
+              <i class="bi bi-camera-video"></i> Join Class
+            </a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-muted">No live classes available yet.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Revision Materials -->
+    <div class="section-title">📘 Revision Materials</div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      {% for mat in revision_materials %}
+      <div class="col">
+        <div class="card h-100" oncontextmenu="return false;">
+          <div class="card-body text-center">
+            <h5 class="card-title">{{ mat.title }}</h5>
+            <button class="btn btn-primary btn-sm" onclick="openPDF('{{ mat.link }}')">
+              <i class="bi bi-eye"></i> View
+            </button>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-muted">No revision materials available.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Videos -->
+    <div class="section-title">🎥 Videos</div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      {% for video in videos %}
+      <div class="col">
+        <div class="card h-100" oncontextmenu="return false;">
+          <div class="ratio ratio-16x9">
+            {% if 'drive.google.com' in video.link %}
+              {% set vid_id = video.link.split('/d/')[1].split('/')[0] if '/d/' in video.link else '' %}
+              <iframe src="https://drive.google.com/file/d/{{ vid_id }}/preview" allowfullscreen></iframe>
+            {% else %}
+              <iframe src="{{ video.link }}" allowfullscreen></iframe>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <h6 class="card-title">{{ video.title }}</h6>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-muted">No videos available.</p>
+      {% endfor %}
+    </div>
+
+    <footer>
+      &copy; {{ current_year }} Learning Portal. All rights reserved.
+    </footer>
+  </main>
+
+  <!-- Fullscreen PDF Modal -->
+  <div class="modal fade" id="pdfModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">PDF Viewer</h5>
+          <div>
+            <button class="btn btn-sm btn-secondary me-2" id="toggleSizeBtn">
+              <i class="bi bi-arrows-fullscreen"></i> Toggle Size
+            </button>
+            <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg"></i> Close
+            </button>
+          </div>
+        </div>
+        <div class="modal-body p-0">
+          <iframe id="pdfFrame" src="" frameborder="0" style="width:100%;height:100%;" oncontextmenu="return false;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.body.classList.toggle('sidebar-open');
+    }
+
+    function openPDF(link) {
+      let embed = link;
+      if (link.includes('drive.google.com')) {
+        const id = link.split('/d/')[1]?.split('/')[0];
+        embed = `https://drive.google.com/file/d/${id}/preview`;
+      }
+      document.getElementById('pdfFrame').src = embed;
+      const modal = new bootstrap.Modal(document.getElementById('pdfModal'));
+      modal.show();
+    }
+
+    // Toggle fullscreen/windowed mode
+    document.getElementById("toggleSizeBtn").addEventListener("click", function() {
+      const modalDialog = document.querySelector("#pdfModal .modal-dialog");
+      modalDialog.classList.toggle("modal-fullscreen");
+    });
+  </script>
+</body>
+</html>
+
