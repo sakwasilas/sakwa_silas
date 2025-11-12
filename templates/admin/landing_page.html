@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Learn Portal</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== Global ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fdfdfd;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      background: linear-gradient(90deg, #004aad, #0066cc);
+      color: white;
+      padding: 15px 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: background 0.4s ease;
+    }
+
+    .navbar.scrolled {
+      background: linear-gradient(90deg, #003a8f, #005dc7);
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .logo span {
+      color: #ffd700;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-links li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links li a:hover {
+      color: #ffd700;
+    }
+
+    .btn-login, .btn-register {
+      background: linear-gradient(45deg, #ffd700, #ffea00);
+      color: #004aad;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-login:hover, .btn-register:hover {
+      transform: scale(1.05);
+      background: white;
+      color: #004aad;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)),
+                  url('image/pp.jpg') center/cover no-repeat;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      padding: 0 20px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .hero-text h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      animation: slideDown 1.2s ease;
+    }
+
+    .hero-text p {
+      font-size: 1.25rem;
+      margin-bottom: 25px;
+      opacity: 0.9;
+      animation: fadeIn 2s ease;
+    }
+
+    .cta-button {
+      background: linear-gradient(90deg, #ffd700, #ffce00);
+      color: #004aad;
+      padding: 14px 35px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      animation: fadeUp 2s ease;
+    }
+
+    .cta-button:hover {
+      background: white;
+      transform: scale(1.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+
+    /* ===== Features Section ===== */
+    .features {
+      padding: 100px 20px;
+      background-color: #f9f9f9;
+      text-align: center;
+    }
+
+    .features h2 {
+      color: #004aad;
+      font-size: 2.5rem;
+      margin-bottom: 50px;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .features h2::after {
+      content: "";
+      width: 80px;
+      height: 4px;
+      background: #ffd700;
+      display: block;
+      margin: 15px auto 0;
+      border-radius: 2px;
+    }
+
+    .feature-boxes {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+    }
+
+    .feature-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px 25px;
+      width: 280px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .feature-box.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .feature-box:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+
+    .feature-box h3 {
+      color: #004aad;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    /* ===== About Section ===== */
+    .about {
+      padding: 100px 20px;
+      text-align: center;
+      background-color: #fff;
+    }
+
+    .about h2 {
+      color: #004aad;
+      font-size: 2.3rem;
+      margin-bottom: 25px;
+    }
+
+    .about p {
+      max-width: 850px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+      opacity: 0.9;
+      line-height: 1.8;
+    }
+
+    /* ===== Contact Section ===== */
+    .contact {
+      padding: 80px 20px;
+      text-align: center;
+      background-color: #f9f9f9;
+    }
+
+    .contact h2 {
+      color: #004aad;
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    .contact a {
+      color: #004aad;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .contact a:hover {
+      color: #ffd700;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background: linear-gradient(90deg, #004aad, #0077ff);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== Animations ===== */
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    @keyframes fadeUp {
+      from {opacity: 0; transform: translateY(30px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes slideDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-text h1 {
+        font-size: 2.2rem;
+      }
+
+      .feature-boxes {
+        flex-direction: column;
+        gap: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">E-Learn<span>Portal</span></div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="/login" class="btn-login">Login</a></li>
+        <li><a href="/register" class="btn-register">Register</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Learn Anytime, Anywhere</h1>
+      <p>Access live classes, revision materials, and videos — all in one place.</p>
+      <a href="/register" class="cta-button">Get Started</a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <h2>Our Courses & Skills</h2>
+    <div class="feature-boxes">
+      <div class="feature-box">
+        <h3>🌐 Front-End Development</h3>
+        <p>Master HTML, CSS & JavaScript to build modern, responsive web applications.</p>
+      </div>
+      <div class="feature-box">
+        <h3>🐍 Python Programming</h3>
+        <p>Learn Python from scratch and automate tasks, build APIs and more.</p>
+      </div>
+      <div class="feature-box">
+        <h3>🔧 Git & GitHub</h3>
+        <p>Version control and collaboration: manage your code like a pro.</p>
+      </div>
+      <div class="feature-box">
+        <h3>💾 MySQL & Databases</h3>
+        <p>Understand data by building and querying relational databases with MySQL.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about">
+    <h2>About Us</h2>
+    <p>
+      We are a dedicated e-learning platform empowering African students to become tech professionals.  
+      Our courses focus on front-end development, Python programming, Git & GitHub, and databases like MySQL.  
+      Join a community where you can learn, practice, and launch your career in technology.  
+      Our goal is to make education accessible, engaging, and practical for every student.
+    </p>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact">
+    <h2>Contact Us</h2>
+    <p>
+      Email: <a href="mailto:support@elearnportal.com">support@elearnportal.com</a> | 
+      Phone: +254 712 345 678
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 E-Learn Portal. All Rights Reserved.</p>
+  </footer>
+
+  <!-- Smooth Scroll + Fade-in Script -->
+  <script>
+    // Change navbar color when scrolling
+    window.addEventListener("scroll", () => {
+      const navbar = document.querySelector(".navbar");
+      if (window.scrollY > 50) navbar.classList.add("scrolled");
+      else navbar.classList.remove("scrolled");
+    });
+
+    // Animate feature boxes when in view
+    const boxes = document.querySelectorAll(".feature-box");
+    const showOnScroll = () => {
+      boxes.forEach(box => {
+        const rect = box.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 50) box.classList.add("show");
+      });
+    };
+    window.addEventListener("scroll", showOnScroll);
+    showOnScroll();
+  </script>
+</body>
+</html>
